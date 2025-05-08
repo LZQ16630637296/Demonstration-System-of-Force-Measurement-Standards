@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<data>  
+    <item ID="cloud">  
+        <name>中文测试</name>  
+        <value>10asdfjsd</value>  
+    </item>  
+    <item ID="edge">  
+        <name>你好雅</name>  
+        <value>将计就计</value>  
+    </item>  
+</data>
+

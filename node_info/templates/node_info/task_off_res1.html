@@ -1,0 +1,79 @@
+{% extends 'node_info/base.html'  %}
+{% block title_content %}算力资源调度结果{% endblock %}
+{% block body_content %}
+    <script type="text/javascript">
+        setInterval(setDataFn,1000); //指定1秒刷新一次
+        function setDataFn(){
+            $.ajax({
+                method: "POST",
+                url: "/resultFile1/",
+                data: {},
+                success: function(data) {
+                    let tasks = data.task;
+                    let htmls = '';
+                    let isFirstCol = true; // 是否是第一个col
+                    for(let task in tasks){
+                        let task_info = tasks[task]
+                        for(let allocate in task_info){
+                            htmls += ' <div class="card" text-center">' +
+                            '<div class="card-header">' + task + '</div>' +
+                            '<div class="card-body">' +
+                            '<h5 class="card-title" text-center>分配</h5>' +
+                            '<ul class="nav justify-content-center">'
+                            let allocate_info = task_info[allocate]
+                            for(let child in allocate_info){
+                                htmls += ''
+                                if(child == '可达性能'){
+                                    if (isFirstCol) {
+                                      htmls += '<div class="container"><div class="row">';
+                                      isFirstCol = false;
+                                    }
+                                    htmls += '<div class="col-12">' + '<span class="badge badge-primary">' + child + '</span>'
+                                        let child_info = allocate_info[child]
+                                        for(let reqc in child_info){
+                                            if(reqc == '响应时间'){
+                                                htmls += '<li class="list-group-item">' + reqc + ':' +
+                                                    '<br>' + '最小:' + child_info[reqc]['最小'] +
+                                                    '<br>' + '最大:' + child_info[reqc]['最大'] +
+                                                    '<br>' + '平均:' + child_info[reqc]['平均'] + '</li>'
+                                            }else{
+                                                htmls += '<li class="list-group-item">' + reqc + ':' + child_info[reqc] + '</li>';
+                                            }
+                                        }
+                                    htmls += '</div></div></div>'
+                                }else{
+                                    htmls += '<li class="nav-item">' + '<a class="nav-link active" href="#">' + child + ':' + allocate_info[child] + '</a>' + '</li>'
+                                }
+                            }
+                            htmls += '</ul></div></div>'
+                        }
+                    }
+                    if (!isFirstCol) {
+                      htmls += '</div></div>'; // 关闭已经打开的<div class="row">
+                    }
+                    $('#task').html(htmls);
+                }
+            })
+        }
+
+    </script>
+    <style>
+        .card-container {
+          display: flex;
+          flex-wrap: wrap;
+        }
+
+        .card {
+          width: calc(33.33% - 20px);
+          margin: 10px;
+          float: left;
+        }
+    </style>
+    <div id="data">
+        {% for item in attack_method %}
+
+        {% endfor %}
+    </div>
+    <div id="task" class="row">
+    </div>
+{% endblock %}

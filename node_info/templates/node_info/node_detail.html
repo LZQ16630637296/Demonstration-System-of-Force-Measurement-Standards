@@ -1,0 +1,23 @@
+{% extends 'node_info/base.html' %}
+{% load mytags %}
+{% block title_content %}{{ object.name }}节点信息{% endblock %}
+{% block body_content %}
+    <div class="card{% if object.name == 'cloud' %} text-white bg-dark{% endif %}" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">{{ object.name }}</h5>
+            <p class="card-text">
+                <span class="badge badge-info">{{ object.IPaddress }}</span>
+                <br>
+                <span class="badge badge-secondary">{{ object.port }}</span>
+            </p>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">keepalive: {{ object.keepalive }}</li>
+        </ul>
+        <div class="card-body">
+            <a href="#" class="card-link">编辑</a>
+            <a href="#" class="card-link">删除</a>
+            <a href="{% url 'node_info:node_list' %}" class="float-right">返回</a>
+        </div>
+    </div>
+{% endblock %}

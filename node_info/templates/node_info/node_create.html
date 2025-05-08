@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>节点信息</title>
+</head>
+<body>
+<form action="{% url 'node_info:node_create' %}" method="post">
+    {% csrf_token %}
+    <p><label>节点名称<input type="text" name="name"></label></p>
+    <p><label>IP<input type="text" name="IPaddress"></label></p>
+    <p><label>PORT<input type="text" name="port"></label></p>
+    <p><label>keepalive<input type="number" name="keepalive"></label></p>
+    <p><button type="submit">保存</button></p>
+</form>
+
+</body>
+</html>

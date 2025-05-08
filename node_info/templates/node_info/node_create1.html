@@ -1,0 +1,16 @@
+{% extends 'node_info/base.html' %}
+{% load mytags %}
+{% block title_content %} 节点加入 {% endblock %}
+{% block body_content %}
+    <form action="{% url 'node_info:node_create' %}", method="post">
+        {% csrf_token %}
+        {% for item in form %}
+            <div class="col-md-auto mb-auto">
+                {{ item|label_class:'form-label' }}
+                {{ item }}
+                {{ item.errors }}
+            </div>
+        {% endfor %}
+        <button class="btn btn-primary" type="submit">新建</button>
+    </form>
+{% endblock %}

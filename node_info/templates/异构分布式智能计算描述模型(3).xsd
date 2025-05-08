@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2011 (http://www.altova.com) by N.Li (Beijing Information Science and Technology University) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="算力资源描述模型" targetNamespace="算力资源描述模型" elementFormDefault="qualified">
+	<xs:complexType name="处理器Type">
+		<xs:sequence>
+			<xs:element name="类型">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="GPU"/>
+						<xs:enumeration value="CPU"/>
+						<xs:enumeration value="TPU"/>
+						<xs:enumeration value="NPU"/>
+						<xs:enumeration value="FPGA"/>
+						<xs:enumeration value="ASIC"/>
+						<xs:enumeration value="Other"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="FLOPS" type="xs:positiveInteger"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="存储Type">
+		<xs:sequence>
+			<xs:element name="类型">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="内存"/>
+						<xs:enumeration value="缓存"/>
+						<xs:enumeration value="外存"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="字节数" type="xs:positiveInteger"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="网络Type">
+		<xs:sequence>
+			<xs:element name="支持的网络协议">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Bluetooth"/>
+						<xs:enumeration value="TCP/IP"/>
+						<xs:enumeration value="Modbus "/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="最小最大吞吐率">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="上行" type="xs:positiveInteger"/>
+						<xs:element name="下行" type="xs:positiveInteger"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="最大最小延迟"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="配置Type">
+		<xs:sequence>
+			<xs:element name="处理器" type="处理器Type" maxOccurs="unbounded"/>
+			<xs:element name="存储" type="存储Type" maxOccurs="unbounded"/>
+			<xs:element name="网络" type="网络Type" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="算力Type">
+		<xs:sequence>
+			<xs:element name="算法">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="绝对"/>
+						<xs:enumeration value="图像分类"/>
+						<xs:enumeration value="实例分割"/>
+						<xs:enumeration value="医疗图像分割"/>
+						<xs:enumeration value="目标检测"/>
+						<xs:enumeration value="自然语言处理"/>
+						<xs:enumeration value="语音识别"/>
+						<xs:enumeration value="智能推荐"/>
+						<xs:enumeration value="强化学习"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="值"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="节点Type">
+		<xs:sequence>
+			<xs:element name="Pod" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="容器" type="配置Type" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="算力" type="算力Type"/>
+			<xs:element name="安全性"/>
+		</xs:sequence>
+		<xs:attribute name="URL"/>
+		<xs:attribute name="ID"/>
+		<xs:attribute name="优先级" type="xs:positiveInteger"/>
+	</xs:complexType>
+	<xs:complexType name="终端设备Type">
+		<xs:sequence>
+			<xs:element name="类型">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:enumeration value="Mobil"/>
+						<xs:enumeration value="Pad"/>
+						<xs:enumeration value="RSU"/>
+						<xs:enumeration value="Sensor"/>
+						<xs:enumeration value="Camera"/>
+						<xs:enumeration value="VOBC"/>
+						<xs:enumeration value="Other"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="配置" type="配置Type"/>
+			<xs:element name="算力" type="算力Type"/>
+			<xs:element name="稳定性"/>
+			<xs:element name="能量"/>
+			<xs:element name="安全性"/>
+		</xs:sequence>
+		<xs:attribute name="URL"/>
+		<xs:attribute name="ID"/>
+		<xs:attribute name="优先级" type="xs:positiveInteger"/>
+	</xs:complexType>
+	<xs:complexType name="云端算力资源Type">
+		<xs:sequence>
+			<xs:element name="节点" type="节点Type" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="边缘端算力资源Type">
+		<xs:sequence>
+			<xs:element name="节点" type="节点Type" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="终端算力资源Type">
+		<xs:sequence>
+			<xs:element name="终端" type="终端设备Type" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="性能Type">
+		<xs:sequence>
+			<xs:element name="响应时间">
+				<xs:complexType>
+					<xs:all>
+						<xs:element name="最大"/>
+						<xs:element name="最小"/>
+						<xs:element name="平均"/>
+					</xs:all>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="能耗"/>
+			<xs:element name="稳定性"/>
+			<xs:element name="安全性"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="模型Type">
+		<xs:sequence>
+			<xs:element name="操作数">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Convolution"/>
+						<xs:element name="Dense"/>
+						<xs:element name="BatchNormalization"/>
+						<xs:element name="ReLU"/>
+						<xs:element name="Add"/>
+						<xs:element name="MaxPooling"/>
+						<xs:element name="GlobalPooling"/>
+						<xs:element name="SoftMax"/>
+						<xs:element name="ForwardPropagation"/>
+						<xs:element name="BackwardDense"/>
+						<xs:element name="BackwardPropagation"/>
+						<xs:element name="Verify"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="数据要求" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="任务单元Type">
+		<xs:sequence>
+			<xs:element name="构成">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="模型" type="模型Type" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="资源需求">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="算力" type="算力Type"/>
+						<xs:element name="存储" type="存储Type"/>
+						<xs:element name="网络" type="网络Type"/>
+						<xs:element name="性能要求" type="性能Type"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="ID"/>
+	</xs:complexType>
+	<xs:complexType name="任务Type">
+		<xs:sequence>
+			<xs:element name="子任务" type="任务单元Type" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="调度结果Type">
+		<xs:sequence>
+			<xs:element name="云端任务" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="分配" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="可达性能" type="性能Type"/>
+								</xs:sequence>
+								<xs:attribute name="任务ID"/>
+								<xs:attribute name="节点ID"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="边缘端任务" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="分配" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="可达性能" type="性能Type"/>
+								</xs:sequence>
+								<xs:attribute name="任务ID"/>
+								<xs:attribute name="节点ID"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="终端任务" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="分配" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="可达性能" type="性能Type"/>
+								</xs:sequence>
+								<xs:attribute name="任务ID"/>
+								<xs:attribute name="设备ID"/>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="可达性能" type="性能Type"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="资源基础利用Type">
+		<xs:sequence>
+			<xs:element name="算力">
+				<xs:complexType>
+					<xs:all>
+						<xs:element name="总算力"/>
+						<xs:element name="已分配算力"/>
+						<xs:element name="使用算力"/>
+					</xs:all>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="存储">
+				<xs:complexType>
+					<xs:all>
+						<xs:element name="总空间"/>
+						<xs:element name="已分配空间"/>
+						<xs:element name="使用空间"/>
+					</xs:all>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="网络">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="总带宽"/>
+						<xs:element name="已分配带宽"/>
+						<xs:element name="使用带宽"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="能量">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="总能量"/>
+						<xs:element name="分配能量"/>
+						<xs:element name="使用能量"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="资源综合利用Type">
+		<xs:sequence>
+			<xs:element name="分析值">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="云端" type="资源基础利用Type" minOccurs="0"/>
+						<xs:element name="边缘端" type="资源基础利用Type" minOccurs="0"/>
+						<xs:element name="终端" type="资源基础利用Type" minOccurs="0"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="观测值">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="网络拥塞"/>
+						<xs:element name="SLA满足率"/>
+						<xs:element name="调度难度"/>
+						<xs:element name="预备时间"/>
+						<xs:element name="成本"/>
+						<xs:element name="可靠性"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="算力资源Type">
+		<xs:sequence>
+			<xs:element name="云端">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="节点" type="xs:anyURI" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="边缘端">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="节点" type="xs:anyURI" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="终端">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="设备" type="xs:anyURI" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>

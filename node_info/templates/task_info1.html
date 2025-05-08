@@ -1,0 +1,179 @@
+{% extends 'node_info/base.html' %}
+{% block title_content %}标准任务描述{% endblock %}
+{% block body_content %}
+    <script type="text/javascript">
+        setInterval(setDataFn,1000); //指定1秒刷新一次
+        function setDataFn(){
+            $.ajax({
+                method: "POST",
+                url: "/taskFile1/",
+                data: {},
+                success: function(data) {
+                    let tasks = data.task;
+                    let htmls = '';
+                    var t;
+                    for (let task in tasks) {
+                        htmls += ' <div class="card" text-center">' +
+                            '<div class="card-header"> MQTTClient </div>' +
+                            '<div class="card-body">' +
+                            '<h5 class="card-title" text-center>' + task + '</h5>' +
+                            '<ul class="nav justify-content-center">'
+
+                        let task_info = tasks[task]
+                        for (let sub_task in task_info) {
+                            {#htmls += ' <div class="card" text-center">' +#}
+                            {#'<div class="card-body">' +#}
+                            {#'<h5 class="card-title" text-center>' + sub_task + '</h5>' +#}
+                            {#'<ul class="nav justify-content-center">'#}
+                            htmls += '<div class="container">' + '<div class="row">'
+
+                            let sub_task_info = task_info[sub_task]
+                            for (let kc in sub_task_info){
+                                htmls += ''
+                                if (kc == '构成') {
+                                    let model = sub_task_info[kc];
+                                    htmls += '<p class="card-text">' + model + '</p>';
+                                    for (let kc1 in model){
+                                        if (kc1 == '操作数'){
+                                            let czs = model[kc1]
+                                            htmls += '<div class="container">' + '<div class="row">'
+                                            for (let kc2 in czs) {
+                                                htmls += '<div class="col-3">' + '<span class="badge badge-primary">' + kc1 + '</span>' +
+                                                    '<li class="list-group-item">' + kc2 + ':' + czs[kc2] + '</li>' + '</div>'
+                                            }
+                                            htmls += '</div></div>'
+                                        }else {
+                                            htmls += '<li class="nav-item">' + '<a class="nav-link active" href="#">' + kc1 + ':' + sub_task[kc] + '</a>' + '</li>'
+                                        }
+                                    }
+                                } else if (kc == '资源需求') {
+                                    let rq = sub_task_info[kc]
+                                    for (let kc1 in rq){
+                                        if (kc1 == '算力'){
+                                            let sl = rq[kc1]
+                                            htmls += '<div class="container">' + '<div class="row">'
+                                            for (let kc2 in sl) {
+                                                htmls += '<div class="col-3">' + '<span class="badge badge-primary">' + kc1 + '</span>' +
+                                                    '<li class="list-group-item">' + kc2 + ':' + sl[kc2] + '</li>' + '</div>'
+                                            }
+                                            htmls += '</div></div>'
+                                        } else if (kc1 == '存储'){
+                                            htmls += '<div class="container">' + '<div class="row">'
+                                            for (let kc2 in kc1) {
+                                                htmls += '<div class="col-3">' + '<span class="badge badge-primary">' + kc1 + '</span>' +
+                                                    '<li class="list-group-item">' + kc2 + ':' + kc1[kc2] + '</li>' + '</div>'
+                                            }
+                                            htmls += '</div></div>'
+                                        }
+                                    }
+
+                                } else {
+                                    htmls += '<li class="nav-item">' + '<a class="nav-link active" href="#">' + kc + ':' + sub_task[kc] + '</a>' + '</li>'
+                                }
+                            }
+                            htmls += '</ul></div></div>'
+                        }
+
+                        htmls += '</ul></div></div>'
+                    }
+
+                    $('#task').html(htmls);
+                }
+            })
+        }
+
+    </script>
+    <div id="data">
+        {% for item in attack_method %}
+
+        {% endfor %}
+    </div>
+    <div id="task" class="row">
+    </div>
+{% endblock %}
+
+
+
+
+
+{% extends 'node_info/base.html' %}
+{% block title_content %}标准任务描述{% endblock %}
+{% block body_content %}
+    <script type="text/javascript">
+        setInterval(setDataFn,1000); //指定1秒刷新一次
+        function setDataFn(){
+            $.ajax({
+                method: "POST",
+                url: "/taskFile1/",
+                data: {},
+                success: function(data) {
+                    let tasks = data.task;
+                    let htmls = '';
+                    var t;
+                    for (let task in tasks) {
+                        htmls += ' <div class="card" text-center">' +
+                            '<div class="card-header"> MQTTClient </div>' +
+                            '<div class="card-body">' +
+                            '<h5 class="card-title" text-center>' + task + '</h5>' +
+                            '<ul class="nav justify-content-center">'
+
+                        let task_info = tasks[task]
+                        for (let sub_task in task_info) {
+                            {#htmls += ' <div class="card" text-center">' +#}
+                            {#'<div class="card-body">' +#}
+                            {#'<h5 class="card-title" text-center>' + sub_task + '</h5>' +#}
+                            {#'<ul class="nav justify-content-center">'#}
+                            htmls += '<div class="container">' + '<div class="row">'
+
+                            let subTaskInfo = task_info[sub_task]
+                            for (let key in subTaskInfo) {
+                                let content = subTaskInfo[key];
+                                if (key == '构成') {
+                                    {#htmls += `#}
+                                    {#<span class="badge badge-primary">${key}</span><span class="badge badge-primary">${content[key]}</span>`;#}
+                                    let consistContent = content[key]
+                                    for (let k in consistContent) {
+                                        let modelContent = consistContent[k]
+
+                                        {#htmls += `#}
+                                        {#<span class="badge badge-primary">${modelContent}</span>`;#}
+                                        for (let key1 in modelContent) {
+                                            let content1 = modelContent[key1]
+                                            if (key1 == '操作数') {
+                                                for (let key2 in content1) {
+                                                    htmls += `
+                                                    <li class="list-group-item">${key2}: ${content1[key2]}</li>`;
+                                                }
+                                            } else if (key1 == '数据要求') {
+                                                htmls += `
+                                                    <li class="list-group-item">${key1}: ${content1}</li>`;
+                                            }
+                                        }
+                                    }
+                                } else if (key == '资源需求') {
+
+
+                                } else {
+                                    htmls += '<li>' + key + ':' + content + '</li>';
+                                }
+                            }
+                            htmls += '</div></div>'
+                        }
+
+                        htmls += '</ul></div></div>'
+                    }
+
+                    $('#task').html(htmls);
+                }
+            })
+        }
+
+    </script>
+    <div id="data">
+        {% for item in attack_method %}
+
+        {% endfor %}
+    </div>
+    <div id="task" class="row">
+    </div>
+{% endblock %}

@@ -1,0 +1,162 @@
+{% extends 'node_info/base.html' %}
+{% block title_content %}标准任务描述{% endblock %}
+{% block body_content %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        th:hover {
+            background-color: #ddd;
+        }
+
+        tr {
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        td {
+            text-align: left;
+        }
+
+        td.text-center {
+            text-align: center;
+        }
+
+        td.text-right {
+            text-align: right;
+        }
+
+        @media screen and (max-width: 767px) {
+            table {
+                border: 0;
+            }
+
+            table th, table td {
+                padding: 5px;
+            }
+
+            table td:before {
+                content: attr(data-label);
+                display: inline-block;
+                font-weight: bold;
+                margin-right: 5px;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        setInterval(setDataFn, 1000); // 指定1秒刷新一次
+
+        function setDataFn() {
+            $.ajax({
+                method: "POST",
+                url: "/taskFile1/",
+                data: {},
+                success: function(data) {
+                    let htmls = '<table>' +
+                        '<tr>' +
+                        '<th rowspan="2">任务名称</th>' +
+                        '<th rowspan="2">子任务名称</th>' +
+                        '<th rowspan="2">ID</th>' +
+                        '<th colspan="2">模型</th>' +
+                        '<th colspan="4">资源需求</th>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<th>操作数</th>' +
+                        '<th>数据要求</th>' +
+                        '<th>算力</th>' +
+                        '<th>存储</th>' +
+                        '<th>网络</th>' +
+                        '<th>性能要求</th>' +
+                        '</tr>';
+
+                    const tasks = data.task;
+                    for (const taskKey in tasks) {
+                        const task = tasks[taskKey];
+                        htmls += `<tr>
+                            <td rowspan="${Object.keys(task).length}">${taskKey}</td>`;
+                        let isFirstSubTask = true;
+                        for (const subTaskKey in task) {
+                            if (isFirstSubTask) {
+                                htmls += `<td>${subTaskKey}</td>`;
+                                isFirstSubTask = false;
+                            } else {
+                                htmls += `<tr><td>${subTaskKey}</td>`;
+                            }
+                            const subTask = task[subTaskKey];
+                            htmls += `<td>${subTask.ID}</td>`;
+                            htmls += `<td>`;
+                            const model = subTask.构成.模型;
+                            for (const operationKey in model.操作数) {
+                                htmls += `${operationKey}: ${model.操作数[operationKey]}<br>`;
+                            }
+                            htmls += `</td>`;
+                            htmls += `<td>${subTask.构成.模型.数据要求}</td>`;
+                            htmls += `<td>${subTask.资源需求.算力.算法}: ${subTask.资源需求.算力.值}</td>`;
+                            htmls += `<td>`;
+                            const storage = subTask.资源需求.存储;
+                            for (const storageTypeKey in storage) {
+                                if (storageTypeKey.includes('类型') && storage[storageTypeKey]) {
+                                    const byteKey = storageTypeKey.replace('类型', '字节数');
+                                    htmls += `${storage[storageTypeKey]}: ${storage[byteKey]}<br>`;
+                                }
+                            }
+                            htmls += `</td>`;
+                            htmls += `<td>`;
+                            const network = subTask.资源需求.网络;
+                            for (const protocolKey in network.支持的网络协议) {
+                                htmls += `${protocolKey}: ${network.支持的网络协议[protocolKey]}<br>`;
+                            }
+                            for (const throughputKey in network.最小最大吞吐率) {
+                                htmls += `${throughputKey}: ${network.最小最大吞吐率[throughputKey]}<br>`;
+                            }
+                            htmls += `延迟: ${network.延迟}<br>`;
+                            htmls += `</td>`;
+                            htmls += `<td>`;
+                            const performance = subTask.资源需求.性能要求;
+                            for (const responseKey in performance.响应时间) {
+                                htmls += `${responseKey}响应时间: ${performance.响应时间[responseKey]}<br>`;
+                            }
+                            htmls += `能耗: ${performance.能耗}<br>`;
+                            htmls += `稳定性: ${performance.稳定性}<br>`;
+                            htmls += `安全性: ${performance.安全性}<br>`;
+                            htmls += `</td>`;
+                            htmls += `</tr>`;
+                        }
+                    }
+
+                    htmls += '</table>';
+                    $('#task').html(htmls);
+                }
+            })
+        }
+    </script>
+
+    <div id="data">
+        {% for item in attack_method %}
+        {% endfor %}
+    </div>
+
+    <div id="task">
+    </div>
+{% endblock %}

@@ -1,0 +1,144 @@
+{% extends 'node_info/base.html'  %}
+{% block title_content %}标准计算节点资源描述{% endblock %}
+{% block body_content %}
+    <script type="text/javascript">
+        setInterval(setDataFn,1000); //指定1秒刷新一次
+        function setDataFn(){
+            $.ajax({
+                method: "POST",
+                url: "/resFile1/",
+                data: {},
+                success: function(data) {
+                    // console.log(data) // check out how data is structured
+                    let sys = data.sys;
+                    // console.log(sys);
+                    let htmls = '';
+                    // let k = sys[0]
+                    // if (k == '节点'){
+                    //     console.log(k);
+                    // }
+                    for(let k in sys){
+                        htmls += ' <div class="card" text-center">' +
+                            '<div class="card-header">资源基础利用</div>' +
+                            '<div class="card-body">' +
+                            '<h5 class="card-title" text-center>' + k + '</h5>' +
+                            '<ul class="nav justify-content-center">'
+
+                        let jd = sys['节点'];
+                        if (k != '节点'){
+                            jd = sys[k]['节点'];
+                        } 
+                        for(let kc in jd){
+                            htmls += ''
+                            if(kc == '容器'){
+                                let rq = jd[kc];
+                                htmls += '<div class="container">' + '<div class="row">'
+                                for(let kc1 in rq){
+                                    let tmp = kc1
+                                    if (kc1 == '处理器1' || kc1 == '处理器2' || kc1 == '处理器3'){
+                                        // let clq = rq[kc1];
+                                        // console.log(kc1);
+                                        // console.log(clq);
+                                        // clq.setAttribute("tagName", "处理器");
+                                        // kc1 = '处理器'
+                                        tmp = '处理器'
+                                    }
+                                    else if (kc1 == '存储1' || kc1 == '存储2' || kc1 == '存储3'){
+                                        tmp = '存储'
+                                    }
+                                    else if (kc1 == '网络1' || kc1 == '网络2' || kc1 == '网络3'){
+                                        tmp = '网络'
+                                    }
+                                   
+                                    htmls += '<div class="col-4">' + '<span class="badge badge-primary">' + tmp + '</span>'
+                                        let rqChild = rq[kc1];
+                                        for(let reqc in rqChild){
+                                            if(reqc == '带宽'){
+                                                htmls += '<li class="list-group-item">' + '总带宽' + ':' +
+                                                    '<br>' + '上行:' + rqChild[reqc]['上行'] +
+                                                    '<br>' + '下行:' + rqChild[reqc]['下行'] + '</li>'
+                                            }
+                                            else{
+                                                htmls += '<li class="list-group-item">' + reqc + ':' + rqChild[reqc] + '</li>';
+                                            }
+                                        }
+                                    htmls += '</div>'
+                                }
+                                htmls += '</div></div>'
+                            }else if(kc == '算力'){
+                                let sl = jd[kc];
+                                htmls += '<div class="container">' + '<div class="row">'
+                                for(let kc2 in sl){
+                                    htmls += '<div class="col-4">' + '<span class="badge badge-primary">' + kc + '</span>' +
+                                    '<li class="list-group-item">' + kc2 + ':' +
+                                        '<br>' + '总算力:' + sl[kc2]['总算力'] +
+                                        '<br>' + '已分配:' + sl[kc2]['已分配'] + '</li>' + '</div>'
+                                }
+                                htmls += '</div></div>'
+                            }else{
+                                htmls += '<li class="nav-item">' + '<a class="nav-link active" href="#">' + kc + ':' + jd[kc] + '</a>' + '</li>'
+                            }
+
+                        }
+
+                        htmls += '</ul></div>'
+                    }                  
+                  
+                    $('#sys').html(htmls);
+                    // Update the coin amount
+                }
+            })
+        }
+
+    </script>
+    <div id="data">
+        {% for item in attack_method %}
+
+        {% endfor %}
+    </div>
+    <div id="sys" class="row">
+{#        {% for val, item in sys.items %}#}
+{#            <div class="card{% if val == 'cloud' %}  {% endif %}">#}
+{#                <div class="card-body">#}
+{#                    <h5 class="card-title">{{ val }}</h5>#}
+{#                    <p class="card-text">#}
+{#                        <span class="badge badge-secondary">MQTTClient</span>#}
+{#                    </p>#}
+{#                </div>#}
+{#                <ul class="list-group list-group-flush">#}
+{#                    {% for v, subitem in item.节点.items %}#}
+{#                        {% if v == "容器"  %}#}
+{#                            {% for v_con, item_con in subitem.items %}#}
+{#                                <span class="badge badge-primary">{{ v_con }}</span>#}
+{#                                {% for v_con_sub, item_con_sub in item_con.items %}#}
+{#                                    {% if v_con_sub == '最小最大吞吐率' %}#}
+{#                                        <table class="table">#}
+{#                                            <tbody>#}
+{#                                            <tr class="ssss">#}
+{#                                                <th scope="row">上行</th>#}
+{#                                                <td>{{ item_con_sub.上行 }}</td>#}
+{#                                            </tr>#}
+{#                                            <tr>#}
+{#                                                <th scope="row">下行</th>#}
+{#                                                <td>{{ item_con_sub.下行 }}</td>#}
+{#                                            </tr>#}
+{#                                            </tbody>#}
+{#                                        </table>#}
+{#                                    {% else %}#}
+{#                                        <li class="list-group-item">{{ v_con_sub }}:{{ item_con_sub }}</li>#}
+{#                                    {% endif %}#}
+{#                                {% endfor %}#}
+{#                            {% endfor %}#}
+{#                        {% elif v == '算力' %}#}
+{#                            {% for v_con, item_con in subitem.items %}#}
+{#                                <span class="badge badge-primary">算力：{{ v_con }} : {{ item_con.算力值 }}</span>#}
+{#                            {% endfor %}#}
+{#                        {% else %}#}
+{#                            <li class="list-group-item">{{ v }}:{{ subitem }} </li>#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                </ul>#}
+{#            </div>#}
+{#        {% endfor %}#}
+    </div>
+{% endblock %}

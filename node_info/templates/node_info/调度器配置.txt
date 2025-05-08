@@ -1,0 +1,24 @@
+自定义调度器：
+https://blog.csdn.net/fly910905/article/details/124000222
+https://blog.wubw.fun/2021/12/build-kubernetes-scheduler-framework-plugin.html#ScorePlugin%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0
+
+
+
+问题：go mod download报错：运行bash hack/get-k8s-as-dep.sh v1.22.11时显示++ go mod download -json k8s.io/api@kubernetes-1.22.11 ++ sed -n 's|.*"Version": "\(.*\)".*|\1|p' + V=kubernetes-1.22.11
+解决：
+export GOPROXY=https://goproxy.cn,direct
+
+更新依赖：
+bash hack/get-k8s-as-dep.sh v1.22.11
+
+构建二进制文件：
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./bin .
+
+构建镜像：
+docker build -t scheduler/test:v0.0.2 ./bin
+
+安装该调度器：
+helm upgrade -i -n lwabish-scheduler --create-namespace lwabish-scheduler ./chart
+
+运行案例：
+k create -f hack/scheduler-test.yml

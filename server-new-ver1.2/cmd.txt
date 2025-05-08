@@ -1,0 +1,57 @@
+python serverAgent_edge.py --clientID edge1
+
+python serverAgent_edge.py --clientID edge2
+
+python serverAgent.py
+
+python  serverAgent_edge.py --clientID edge1 --url 2@node --ID e1 
+
+python  serverAgent_edge.py --clientID edge2 --url 3@node --ID e2
+
+cd .\server-new-ver1.2\
+
+python  serverAgent.py --clientID cloud2 --broker
+
+
+
+python .\manage.py runserver
+
+
+
+
+
+
+在linux上部署Django项目：
+1、配置emqx：
+下载：wget https://www.emqx.com/zh/downloads/broker/5.0.26/emqx-5.0.26-ubuntu22.04-amd64.tar.gz
+解压：mkdir -p emqx && tar -zxvf emqx-5.0.26-ubuntu22.04-amd64.tar.gz -C emqx
+运行：./emqx/bin/emqx start
+停止：./emqx/bin/emqx stop
+
+2、下载相关包：
+pip install -r requirements.txt
+pip install djangorestframework-xml
+pip install djangorestframework
+
+3、运行：
+python3 manage.py runserver
+
+4、节点接入平台：
+python3  serverAgent.py --clientID cloud --broker 192.168.165.82 
+
+5. 将本机文件更新到边缘设备上
+scp -r server-new-ver1.2  shumeipai@192.168.165.183:/home/shumeipai/demo
+
+
+
+
+
+
+
+
+
+
+
+
+
+

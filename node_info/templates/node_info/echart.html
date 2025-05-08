@@ -1,0 +1,162 @@
+{% extends 'node_info/base.html' %}
+{% load mytags %}
+
+{% block body_content %}
+    <div id="container" style="width:100%; min-height: 500px;">
+
+    </div>
+    <script type="text/javascript">
+    $(function(){
+        var myChart = echarts.init(document.getElementById('container'));
+        var categories = [
+            {name:'服务器'},
+            {name:'子任务'}
+        ];
+        var option = {
+            // 图的标题
+            title: {
+                // text: 'ECharts 关系图'
+            },
+            // 提示框的配置
+            tooltip: {
+                formatter: function (x) {
+                    return x.data.des;
+                }
+            },
+            legend: [{
+                 {#selectedMode: 'single',#}
+                 data: categories.map(function (a) {
+                    return a.name;
+                 })
+            }],
+            series: [{
+                type: 'graph', // 类型:关系图
+                layout: 'force', //图的布局，类型为力导图
+                symbolSize: 35, // 调整节点的大小
+                roam: true, // 是否开启鼠标缩放和平移漫游。默认不开启。如果只想要开启缩放或者平移,可以设置成 'scale' 或者 'move'。设置成 true 为都开启
+                //edgeSymbol: ['circle', 'arrow'], //开启 关系 箭头
+                edgeSymbolSize: [2, 10],
+                force: {
+                    repulsion: 2000,
+                    edgeLength: [10, 50],
+                    layoutAnimaTion:false //去掉动画
+                },
+                draggable: false,
+                lineStyle: {
+                    normal: {
+                        width: 2,
+                        color: '#6498bb',
+                    }
+                },
+                edgeLabel: {
+                    normal: {
+                        show: true,
+                        formatter: function (x) {
+                            return x.data.name;
+                        }
+                    }
+                },
+                label: {
+                    normal: {
+                        show: true,
+                        textStyle: {}
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true,
+                            textStyle: {
+                                color: '#aaa'
+                            },
+                            position: 'bottom',//标签位置
+                            distance: 5//标签距离图形的距离
+                        },
+                        nodeStyle: {
+                            brushType: 'both',
+                            borderColor: 'rgba(255,215,0,0.4)',
+                            borderWidth: 1
+                        },
+                        linkStyle: {
+                            type: 'line'
+                        }
+                    },
+                    emphasis: {//高亮的图形样式
+                        label: {
+                            show: false
+                            // textStyle: null      // 默认使用全局文本样式，详见TEXTSTYLE
+                        },
+                        nodeStyle: {
+                            //r: 30
+                        },
+                        linkStyle: {}
+                    }
+                },              // 数据
+                data: [
+                  {
+                      name: 'node01',
+                      {#symbol: "image:///images/lgs_24.png",#}
+                      // symbolSize: 90,
+                      category: '类目0'
+                  }, {
+                      name: 'node02',
+                      {#symbol: "image:///images/lgs_25.png",#}
+                      category: '类目1'
+                  }, {
+                      name: 'node03',
+                      {#symbol: "image:///images/lgs_25.png",#}
+                      category: '类目1'
+                  }, {
+                      name: 'node04',
+                      {#symbol: "image:///images/lgs_25.png",#}
+                      category: '类目1'
+                  }, {
+                      name: 'node05',
+                      {#symbol: "image:///images/lgs_25.png",#}
+                      category: '类目1'
+                  }
+                ],
+                links: [
+                    {
+                      source: 'node01',
+                      target: 'node02',
+                      name: 'link01'
+                  }, {
+                      source: 'node01',
+                      target: 'node03',
+                      name: 'link02'
+                  }, {
+                      source: 'node01',
+                      target: 'node04',
+                      name: 'link03'
+                  }, {
+                      source: 'node01',
+                      target: 'node05',
+                      name: 'link04'
+                  }
+                ],
+                categories: categories
+            }]
+        };
+        setInterval(setDataFn, 2000); // 指定1秒刷新一次
+        setDataFn();
+        function setDataFn() {
+            $.ajax({
+                method: "POST",
+                url: "/taskFilePos/",
+                data: {},
+                success: function(data) {
+                    console.log(data)
+                    let dat = data.data;
+
+                    option.series[0].data = dat.data;
+                    option.series[0].links = dat.link;
+                    myChart.setOption(option);
+                }
+            })
+        }
+    })
+</script>
+{% endblock %}
+
+

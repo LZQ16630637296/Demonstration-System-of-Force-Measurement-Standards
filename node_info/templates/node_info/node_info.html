@@ -1,0 +1,176 @@
+{#{% extends 'node_info/base.html' %}#}
+{#{% load mytags %}#}
+{#{% block title_content %}节点信息{% endblock %}#}
+{#{% block body_content %}#}
+{#    <table class="table">#}
+{#        <thead>#}
+{#        <tr>#}
+{#            <th scope="col">ID</th>#}
+{#            <th scope="col">IP</th>#}
+{#            <th scope="col">Port</th>#}
+{#            <th scope="col">keepalive</th>#}
+{#            <th scope="col">状态</th>#}
+{#            <th scope="col">启动</th>#}
+{#            <th scope="col">停止</th>#}
+{#            <th scope="col">删除</th>#}
+{#        </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#        {% for item in object_list %}#}
+{#            {% if item.name != 'rec' %}#}
+{#                <tr>#}
+{#                    <td><a href="{% url 'node_info:node_detail' item.pk %}">{{item.name | default:"cloud"}}</a></td>#}
+{#                    <td>{{item.IPaddress}}</td>#}
+{#                    <td>{{item.port}}</td>#}
+{#                    <td>{{item.keepalive}}</td>#}
+{#                    <td><form method="post" action="{% url 'node_info:server_start' %}">#}
+{#                        {% csrf_token %}#}
+{#                        {% if item.status == 0 %}#}
+{#                            <button type="submit" name="button_name" value="{{ item.name }}">启动</button>#}
+{#                        {% else %}#}
+{#                            <button type="submit" name="button_name" value="{{ item.name }}" disabled>启动</button>#}
+{#                        {% endif %}#}
+{#                    </form></td>#}
+{#                    <td><form method="post" action="{% url 'node_info:server_stop' %}">#}
+{#                        {% csrf_token %}#}
+{#                        {% if item.status == 1 %}#}
+{#                            <button type="submit" name="button_name" value="{{ item.name }}">停止</button>#}
+{#                        {% else %}#}
+{#                            <button type="submit" name="button_name" value="{{ item.name }}" disabled>停止</button>#}
+{#                        {% endif %}#}
+{#                    </form></td>#}
+{#                    <td><form method="post" action="{% url 'node_info:server_delete' %}">#}
+{#                            {% csrf_token %}#}
+{#                            <button type="submit" name="button_name" value="{{item.name}}">删除</button>#}
+{#                        </form></td>#}
+{#                    </tr>#}
+{#            {% endif %}#}
+{#        {% empty %}#}
+{#            <tr>#}
+{#                <td colspan='4'>暂无数据</td>#}
+{#            </tr>#}
+{#        {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
+{#    <style>#}
+{#        .container {#}
+{#            display: flex;#}
+{#            justify-content: space-between;#}
+{#        }#}
+{#    </style>#}
+{#    <div class="container">#}
+{#        <div class="btn-group" role="group" aria-label="Basic example">#}
+{#            <p><a class="btn btn-primary" href="{% url 'node_info:sys_status_file' %}">系统信息</a></p>#}
+{#            <p><a class="btn btn-primary" href="{% url 'node_info:task_status_file' %}">任务信息</a></p>#}
+{#        </div>#}
+{#        <div class="btn-group" role="group" aria-label="Basic example">#}
+{#            <p><a class="btn btn-primary" href="{% url 'node_info:sys_status_file' %}">系统信息</a></p>#}
+{#            <p><a class="btn btn-primary" href="{% url 'node_info:task_status_file' %}">任务信息</a></p>#}
+{#        </div>#}
+{#        <p><a class="btn btn-primary" href="{% url 'node_info:node_create' %}">新建节点</a></p>#}
+{#    </div>#}
+{#{% endblock %}#}
+
+{% extends 'node_info/base.html' %}
+{% load mytags %}
+
+{% block title_content %}节点信息{% endblock %}
+
+{% block body_content %}
+    <div class="btn-toolbar" style="margin-bottom: 20px;" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group mr-2" role="group" aria-label="First group">
+            <a class="btn btn-primary" href="{% url 'node_info:node_create' %}">新建节点</a>
+        </div>
+{#        <div class="btn-group mr-2" role="group" aria-label="First group">#}
+{#            <a class="btn btn-primary" href="{% url 'node_info:sys_status_file' %}">系统信息</a>#}
+{#        </div>#}
+{#        <div class="btn-group mr-2" role="group" aria-label="First group">#}
+{#            <a class="btn btn-primary" href="{% url 'node_info:task_status_file' %}">任务信息</a>#}
+{#        </div>#}
+        {% for item in object_list %}
+            {% if item.name == 'taskStart' %}
+                <div class="btn-group mr-2" role="group" aria-label="First group">
+                    <form method="post" action="{% url 'node_info:task_start' %}">
+                        {% csrf_token %}
+                        {% if item.status == 0 %}
+                            <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-primary">自动发送任务</button>
+                        {% else %}
+                            <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-primary" disabled>自动发送任务</button>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="btn-group mr-2" role="group" aria-label="First group">
+                    <form method="post" action="{% url 'node_info:task_stop' %}">
+                        {% csrf_token %}
+                        {% if item.status == 1 %}
+                            <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-primary">停止发送任务</button>
+                        {% else %}
+                            <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-primary" disabled>停止发送任务</button>
+                        {% endif %}
+                    </form>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+{#                <th scope="col">IP</th>#}
+{#                <th scope="col">Port</th>#}
+{#                <th scope="col">keepalive</th>#}
+                <th scope="col">接入</th>
+                <th scope="col">退出</th>
+                <th scope="col">删除</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in object_list %}
+                {% if item.name != 'rec' and item.name != 'taskStart' and item.name != 'taskStop' %}
+                    <tr>
+                        <td><a href="{% url 'node_info:node_detail' item.pk %}">{{item.name | default:"cloud"}}</a></td>
+{#                        <td>{{item.IPaddress}}</td>#}
+{#                        <td>{{item.port}}</td>#}
+{#                        <td>{{item.keepalive}}</td>#}
+                        <td>
+                            <form method="post" action="{% url 'node_info:server_start' %}">
+                                {% csrf_token %}
+                                {% if item.status == 0 %}
+                                    <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-sm btn-success">接入</button>
+                                {% else %}
+                                    <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-sm btn-success" disabled>接入</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'node_info:server_stop' %}">
+                                {% csrf_token %}
+                                {% if item.status == 1 %}
+                                    <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-sm btn-danger">退出</button>
+                                {% else %}
+                                    <button type="submit" name="button_name" value="{{ item.name }}" class="btn btn-sm btn-danger" disabled>退出</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'node_info:server_delete' %}">
+                                {% csrf_token %}
+                                <button type="submit" name="button_name" value="{{item.name}}" class="btn btn-sm btn-secondary">删除</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan='4'>暂无数据</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
+
+
+

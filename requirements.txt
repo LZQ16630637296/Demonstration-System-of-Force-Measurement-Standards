@@ -1,0 +1,7 @@
+xmltodict~=0.13.0
+paho-mqtt~=1.6.1
+numpy~=1.24.2
+Django~=4.2.2
+psutil~=5.9.5
+py-cpuinfo~=9.0.0
+pynvml~=11.5.0

@@ -1,0 +1,498 @@
+{% extends 'node_info/base.html'  %}
+{% block title_content %}标准计算节点资源描述{% endblock %}
+{% block body_content %}
+    <style>
+        .node-card {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #2193b0, #6dd5ed);
+            color: white;
+            cursor: pointer;
+        }
+
+        .card-header:hover {
+            background: linear-gradient(45deg, #1c7430, #28a745);
+        }
+
+        .detail-section {
+            display: none;
+            padding: 15px;
+        }
+
+        .detail-section.active {
+            display: block;
+        }
+
+        .property-title {
+            font-weight: bold;
+            color: #2193b0;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+            cursor: pointer;
+        }
+
+        .nested-card {
+            margin: 10px 0;
+            border-left: 3px solid #2193b0;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+
+        .badge-custom {
+            background-color: #e9ecef;
+            color: #2193b0;
+            font-weight: normal;
+            padding: 5px 10px;
+        }
+
+        .subsection {
+            display: none;
+            padding: 10px;
+        }
+
+        .arrow-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .arrow-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+
+    <!-- 加载动画 -->
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">加载中...</span>
+        </div>
+    </div>
+
+    <!-- 页面标题 -->
+    <!-- 移除实时更新提示，只保留标题 -->
+        <div class="col text-center">
+            <h2 class="text-primary">计算节点资源描述</h2>
+        </div>
+    </div>
+
+    <!-- 节点容器 -->
+    <div id="nodes-container"></div>
+
+    <script type="text/javascript">
+        // 修改 renderNode 函数
+        // 修改 renderNode 函数中的相关部分
+        function renderNode(node) {
+            let html = `
+                <div class="node-card">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center collapsible"
+                             onclick="toggleSection('node-${node.ID}')">
+                            <h5 class="mb-0">
+                                <i class="fas fa-server mr-2"></i>
+                                节点 ${node.ID}
+                            </h5>
+                            <i class="fas fa-chevron-down arrow-icon" id="arrow-${node.ID}"></i>
+                        </div>
+                        <div class="detail-section" id="node-${node.ID}">
+                            <div class="row">
+                                <div class="col-12">
+                                    ${renderBasicInfo(node)}
+                                    ${renderComputeUnits(node)}
+                                    ${renderCommunicationUnits(node.算力配置)}
+                                    ${renderStorageUnits(node.算力配置)}
+                                    ${renderDeviceInfo(node)}
+                                    ${renderResourceUsage(node)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            return html;
+        }
+        // 添加 renderDeviceInfo 函数
+        function renderDeviceInfo(node) {
+            let html = '';
+
+            // 渲染终端设备信息
+            if (node.终端设备) {
+                html += `
+                    <div class="section-device mb-4">
+                        <div class="section-title property-title" onclick="toggleSubSection('terminal-${node.ID}')">
+                            <span>终端设备信息</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="subsection" id="terminal-${node.ID}">
+                            <div class="nested-card">
+                                ${Object.entries(node.终端设备).map(([key, value]) => `
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted">${key}:</small>
+                                        <span class="badge badge-custom">${value}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            // 渲染非终端设备信息
+            if (node.非终端设备) {
+                html += `
+                    <div class="section-device mb-4">
+                        <div class="section-title property-title" onclick="toggleSubSection('non-terminal-${node.ID}')">
+                            <span>非终端设备信息</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="subsection" id="non-terminal-${node.ID}">
+                            <div class="nested-card">
+                                ${Object.entries(node.非终端设备).map(([key, value]) => {
+                                    if (key === '位置') {
+                                        return `
+                                            <div class="mb-2">
+                                                <small class="text-muted">位置:</small>
+                                                <div class="ml-3">
+                                                    <div>经度: ${value.经度.度}°${value.经度.分}'${value.经度.秒}"</div>
+                                                    <div>纬度: ${value.纬度.度}°${value.纬度.分}'${value.纬度.秒}"</div>
+                                                </div>
+                                            </div>`;
+                                    } else {
+                                        return `
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <small class="text-muted">${key}:</small>
+                                                <span class="badge badge-custom">${value}</span>
+                                            </div>`;
+                                    }
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            return html;
+        }
+        function renderBasicInfo(node) {
+            return `
+                <div class="section-basic mb-4">
+                    <div class="section-title property-title" onclick="toggleSubSection('basic-${node.ID}')">
+                        <span>基本信息</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="subsection" id="basic-${node.ID}">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>ID:</strong> <span class="badge badge-custom">${node.ID}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>URI:</strong> <span class="badge badge-custom">${node.URI}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>单价:</strong> <span class="badge badge-custom">${node.单价}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>优先级:</strong> <span class="badge badge-custom">${node.优先级}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function renderComputeUnits(node) {
+            const config = node.算力配置;
+            if (!config || !config.计算单元集合) return '';
+            let html = `
+                <div class="section-compute mb-4">
+                    <div class="section-title property-title" onclick="toggleSubSection('compute-${node.ID}')">
+                        <span>计算单元</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="subsection" id="compute-${node.ID}">
+                        <div class="mb-3">
+                            <strong>算力值:</strong> <span class="badge badge-custom">${config.算力值}</span>
+                            <strong class="ml-3">软件环境:</strong> <span class="badge badge-custom">${config.软件环境}</span>
+                        </div>`;
+            if (config.计算单元集合.处理器) {
+                config.计算单元集合.处理器.forEach(processor => {
+                    html += `
+                        <div class="nested-card">
+                            <div class="section-title" onclick="toggleSubSection('processor-${processor.ID}')">
+                                <strong>${processor.ID}</strong>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="subsection" id="processor-${processor.ID}">
+                                ${renderProcessorDetails(processor)}
+                            </div>
+                        </div>`;
+                });
+            }
+            html += '</div></div>';
+            return html;
+        }
+
+        function renderProcessorDetails(processor) {
+            let type = Object.keys(processor.类型)[0];
+            let details = processor.类型[type];
+
+            let html = `
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="badge badge-custom mb-2">类型: ${type}</div>
+                        ${Object.entries(details).map(([key, value]) => `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">${key}:</small>
+                                <span class="badge badge-custom">
+                                    ${Array.isArray(value) ? value.join(', ') : value}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+
+            // 添加速度集合
+            if (processor.速度集合 && processor.速度集合.速度) {
+                html += `
+                    <div class="mt-3">
+                        <div class="badge badge-custom mb-2">速度集合</div>
+                        ${processor.速度集合.速度.map(speed => `
+                            <div class="nested-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">每秒运算次数:</small>
+                                    <span class="badge badge-custom">${speed.每秒运算次数}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">操作数类型:</small>
+                                    <span class="badge badge-custom">${speed.操作数类型}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">位数:</small>
+                                    <span class="badge badge-custom">${speed.位数}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            }
+
+            return html;
+        }
+        function renderCommunicationUnits(node) {
+            if (!node.通信单元集合 || !node.通信单元集合.通信单元) return '';
+            let html = `
+                <div class="section-communication mb-4">
+                    <div class="section-title property-title" onclick="toggleSubSection('communication-${node.ID}')">
+                        <span>通信单元</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="subsection" id="communication-${node.ID}">`;
+            // 确保通信单元是数组
+            const units = Array.isArray(node.通信单元集合.通信单元) ?
+                         node.通信单元集合.通信单元 :
+                         [node.通信单元集合.通信单元];
+            units.forEach(unit => {
+                html += `
+                    <div class="nested-card">
+                        <div class="section-title" onclick="toggleSubSection('com-${unit.ID}-${node.ID}')">
+                            <strong>${unit.ID}</strong>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="subsection" id="com-${unit.ID}-${node.ID}">
+                            ${renderCommunicationDetails(unit)}
+                        </div>
+                    </div>`;
+            });
+            html += '</div></div>';
+            return html;
+        }
+        function renderCommunicationDetails(unit) {
+            return `
+                <div class="row mt-2">
+                    <div class="col-12">
+                        ${Object.entries(unit).map(([key, value]) => {
+                            if (typeof value === 'object') {
+                                return `
+                                    <div class="mb-2">
+                                        <small class="text-muted">${key}:</small>
+                                        ${Object.entries(value).map(([subKey, subValue]) => `
+                                            <div class="ml-3">
+                                                <small>${subKey}:</small>
+                                                <span class="badge badge-custom">${subValue}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>`;
+                            } else {
+                                return `
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted">${key}:</small>
+                                        <span class="badge badge-custom">${value}</span>
+                                    </div>`;
+                            }
+                        }).join('')}
+                    </div>
+                </div>`;
+        }
+        function renderStorageUnits(node) {
+            if (!node.存储单元集合 || !node.存储单元集合.存储单元) return '';
+            let html = `
+                <div class="section-storage mb-4">
+                    <div class="section-title property-title" onclick="toggleSubSection('storage-${node.ID}')">
+                        <span>存储单元</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="subsection" id="storage-${node.ID}">`;
+            // 确保存储单元是数组
+            const units = Array.isArray(node.存储单元集合.存储单元) ?
+                         node.存储单元集合.存储单元 :
+                         [node.存储单元集合.存储单元];
+            units.forEach(unit => {
+                html += `
+                    <div class="nested-card">
+                        <div class="section-title" onclick="toggleSubSection('storage-${unit.ID}-${node.ID}')">
+                            <strong>${unit.ID}</strong>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="subsection" id="storage-${unit.ID}-${node.ID}">
+                            ${renderStorageDetails(unit)}
+                        </div>
+                    </div>`;
+            });
+            html += '</div></div>';
+            return html;
+        }
+        function renderStorageDetails(unit) {
+            return `
+                <div class="row mt-2">
+                    <div class="col-12">
+                        ${Object.entries(unit).map(([key, value]) => `
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted">${key}:</small>
+                                <span class="badge badge-custom">${value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+        }
+        function renderResourceUsage(node) {
+            const usage = node.资源占用;
+            if (!usage) return '';
+            return `
+                <div class="section-usage mb-4">
+                    <div class="section-title property-title" onclick="toggleSubSection('usage-${node.ID}')">
+                        <span>资源占用</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="subsection" id="usage-${node.ID}">
+                        <div class="nested-card">
+                            ${Object.entries(usage).map(([key, value]) => {
+                                if (typeof value === 'object') {
+                                    return `
+                                        <div class="mb-2">
+                                            <small class="text-muted">${key}:</small>
+                                            ${Object.entries(value).map(([subKey, subValue]) => `
+                                                <div class="ml-3">
+                                                    <small>${subKey}:</small>
+                                                    <span class="badge badge-custom">${subValue}</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>`;
+                                } else {
+                                    return `
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">${key}:</small>
+                                            <span class="badge badge-custom">${value}</span>
+                                        </div>`;
+                                }
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // 存储展开状态
+        let expandedSections = new Set();
+        let expandedSubSections = new Set();
+
+        function toggleSection(id) {
+            $(`#${id}`).slideToggle();
+            $(`#arrow-${id.split('-')[1]}`).toggleClass('rotated');
+
+            // 保存展开状态
+            if (expandedSections.has(id)) {
+                expandedSections.delete(id);
+            } else {
+                expandedSections.add(id);
+            }
+        }
+
+        function toggleSubSection(id) {
+            $(`#${id}`).slideToggle();
+            event.stopPropagation();
+
+            // 保存子部分展开状态
+            if (expandedSubSections.has(id)) {
+                expandedSubSections.delete(id);
+            } else {
+                expandedSubSections.add(id);
+            }
+        }
+
+        function updateData() {
+            $.ajax({
+                method: "POST",
+                url: "/sysFile1/",
+                data: {},
+                beforeSend: function() {
+                    $('.loading-spinner').show();
+                },
+                success: function(data) {
+                    const nodes = data.sys['算力资源']['节点'];
+                    let html = '';
+                    nodes.forEach(node => {
+                        html += renderNode(node);
+                    });
+                    $('#nodes-container').html(html);
+
+                    // 恢复展开状态
+                    expandedSections.forEach(id => {
+                        $(`#${id}`).show();
+                        $(`#arrow-${id.split('-')[1]}`).addClass('rotated');
+                    });
+
+                    expandedSubSections.forEach(id => {
+                        $(`#${id}`).show();
+                    });
+                },
+                complete: function() {
+                    $('.loading-spinner').hide();
+                }
+            });
+        }
+
+        // 初始加载
+        updateData();
+        // 降低更新频率到10秒一次
+        setInterval(updateData, 10000);
+    </script>
+{% endblock %}
